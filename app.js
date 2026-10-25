@@ -398,10 +398,31 @@ $("table-btn").addEventListener("click", () => openHistory("game"));
 $("over-table-btn").addEventListener("click", () => openHistory("gameover"));
 $("history-back-btn").addEventListener("click", () => showScreen(historyReturnTo));
 
-$("abandon-btn").addEventListener("click", () => {
-  if (confirm("End this game and go back to setup? Scores will be lost.")) {
-    leaveGame();
-  }
+$("quit-btn").addEventListener("click", () => {
+  ask("Quit this game? It won't be saved.", leaveGame);
+});
+
+// ---------- "Are you sure?" ----------
+
+let onAskYes = null;
+
+// Shows the "Are you sure?" screen; runs `onYes` only if Yes is tapped
+function ask(detail, onYes) {
+  $("ask-detail").textContent = detail;
+  onAskYes = onYes;
+  $("ask").classList.remove("hidden");
+}
+
+function closeAsk() {
+  $("ask").classList.add("hidden");
+  onAskYes = null;
+}
+
+$("ask-cancel").addEventListener("click", closeAsk);
+$("ask-yes").addEventListener("click", () => {
+  const action = onAskYes;
+  closeAsk();
+  if (action) action();
 });
 
 // ---------- Game over ----------
@@ -502,10 +523,10 @@ function renderPast() {
 $("past-btn").addEventListener("click", () => { renderPast(); showScreen("past"); });
 $("past-back-btn").addEventListener("click", () => showScreen("setup"));
 $("clear-past-btn").addEventListener("click", () => {
-  if (confirm("Delete all past games? This can't be undone.")) {
+  ask("Delete all past games? This can't be undone.", () => {
     save(HISTORY_KEY, null);
     renderPast();
-  }
+  });
 });
 
 // ---------- Init ----------

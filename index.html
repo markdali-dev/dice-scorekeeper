@@ -51,6 +51,7 @@
         <span id="target-label">to 10,000</span>
       </div>
       <button type="button" id="table-btn" class="small-btn">Table</button>
+      <button type="button" id="quit-btn" class="small-btn">Quit</button>
     </header>
 
     <div id="banner" class="banner hidden"></div>
@@ -99,7 +100,6 @@
     <div class="table-wrap">
       <table id="history-table"></table>
     </div>
-    <button type="button" id="abandon-btn" class="big-btn muted-btn">End game &amp; start over</button>
   </section>
 
   <!-- ===== Game over ===== -->
@@ -122,6 +122,14 @@
     <ul id="past-list"></ul>
     <button type="button" id="clear-past-btn" class="big-btn muted-btn">Delete all past games</button>
   </section>
+
+  <!-- ===== "Are you sure?" (covers whatever screen is showing) ===== -->
+  <div id="ask" class="ask hidden" role="dialog" aria-modal="true" aria-labelledby="ask-title">
+    <h2 id="ask-title">Are you sure?</h2>
+    <p id="ask-detail"></p>
+    <button type="button" id="ask-yes" class="big-btn danger">Yes</button>
+    <button type="button" id="ask-cancel" class="big-btn">Cancel</button>
+  </div>
 
   <script src="app.js"></script>
 </body>

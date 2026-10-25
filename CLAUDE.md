@@ -33,6 +33,7 @@ A simple scorekeeping app for a dice game, used at the table so the scorekeeper 
 
 ## Mistakes
 - Undo: step back through entries one at a time, including across turns and rounds.
+- Quit: button on the game screen; shows "Are you sure?" with Yes / Cancel. Yes discards the game (not saved to Past games).
 - Editing past rounds directly is NOT needed.
 
 ## Screen layout
