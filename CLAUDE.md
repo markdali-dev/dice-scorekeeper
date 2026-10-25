@@ -39,7 +39,7 @@ A simple scorekeeping app for a dice game, used at the table so the scorekeeper 
 ## Screen layout
 - Current player clearly highlighted.
 - All players' running totals always visible.
-- Round-by-round history table available (toggle or second view).
+- Round-by-round score table available, labelled "Scores" (button in the top bar and on game over).
 
 ## Persistence
 - In-progress game auto-saves on every action and resumes after a refresh, app close, or phone lock (localStorage).
