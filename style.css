@@ -4,7 +4,7 @@
 :root {
   /* Background */
   --bg: #07090f;
-  --bg-glow: #182a47;
+  --bg-glow: #1b3358;
   --bg-mid: #0b111c;
 
   /* Panels and cards */
@@ -22,16 +22,17 @@
   --accent-soft: rgba(26, 163, 255, 0.16);
   --accent-glow: rgba(26, 163, 255, 0.45);
 
-  /* Keycaps: top colour, bottom colour, edge (the "side" of the key) */
-  --key-top: #3a4152;      --key-bot: #2a303d;      --key-edge: #151922;
-  --fn-top: #2a303c;       --fn-bot: #1f242e;       --fn-edge: #10131a;
-  --quick-top: #1d4166;    --quick-bot: #163352;    --quick-edge: #0a1a2c;
-  --go-top: #3f9b77;       --go-bot: #2e7a5c;       --go-edge: #1a4a37;   /* muted green */
-  --bust-top: #b0574d;     --bust-bot: #8e423a;     --bust-edge: #592823; /* muted brick */
-  --sel-top: #2eaaff;      --sel-bot: #138bdb;      --sel-edge: #0a5a92;
+  /* Keycaps: top colour and bottom colour of the face. The side is a
+     darker shade of the bottom colour, worked out in .key below. */
+  --key-top: #3a4152;      --key-bot: #2a303d;
+  --fn-top: #2a303c;       --fn-bot: #1f242e;
+  --quick-top: #1d4166;    --quick-bot: #163352;
+  --go-top: #3f9b77;       --go-bot: #2e7a5c;   /* muted green */
+  --bust-top: #b0574d;     --bust-bot: #8e423a; /* muted brick */
+  --sel-top: #2eaaff;      --sel-bot: #138bdb;
 
   --radius: 16px;
-  --edge: 4px;             /* keycap edge height */
+  --edge: 10px;            /* keycap side height */
   --font: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -55,15 +56,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Fine film grain over the background so it isn't a flat colour */
+/* Glowing honeycomb grid: thin blue hexagons, brightest at the top and
+   fading out towards the bottom of the screen */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: 0.07;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("icons/hex-grid.svg");
+  -webkit-mask-image: radial-gradient(130% 75% at 50% 0%, #000 0%, rgba(0, 0, 0, 0.55) 45%, rgba(0, 0, 0, 0.12) 100%);
+          mask-image: radial-gradient(130% 75% at 50% 0%, #000 0%, rgba(0, 0, 0, 0.55) 45%, rgba(0, 0, 0, 0.12) 100%);
 }
 
 button, input {
@@ -104,11 +106,15 @@ button, input {
   gap: 12px;
 }
 
-/* ---------- Keycaps ---------- */
+/* ---------- Keycaps ("deep keycap") ----------
+   Face: bright lit strip at the top fading to a darker base.
+   Side: a solid band below the face, a darker shade of the key's own
+   colour so it stays visible against the dark background.
+   Pressed: the face sinks down over its side. */
 .key {
   --top: var(--key-top);
   --bot: var(--key-bot);
-  --side: var(--key-edge);
+  --side: color-mix(in srgb, var(--bot) 58%, #000);
   position: relative;
   border: none;
   border-radius: var(--radius);
@@ -118,23 +124,25 @@ button, input {
   font-weight: 600;
   letter-spacing: 0.01em;
   color: var(--text);
-  background: linear-gradient(180deg, var(--top) 0%, var(--bot) 100%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--top) 75%, #fff) 0%, var(--top) 14%, var(--bot) 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),     /* lit top edge */
-    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+    inset 0 2px 0 rgba(255, 255, 255, 0.28),     /* lit top edge */
+    inset 0 -3px 6px rgba(0, 0, 0, 0.25),
     0 var(--edge) 0 var(--side),                 /* the key's side */
-    0 calc(var(--edge) + 4px) 12px rgba(0, 0, 0, 0.45);
+    0 calc(var(--edge) + 1px) 0 rgba(0, 0, 0, 0.7),
+    0 calc(var(--edge) + 10px) 18px rgba(0, 0, 0, 0.7);
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   transition: transform 70ms ease-out, box-shadow 70ms ease-out, filter 70ms;
 }
 .key:active {
-  transform: translateY(calc(var(--edge) - 1px));
+  transform: translateY(calc(var(--edge) - 2px));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 2px 6px rgba(0, 0, 0, 0.25),
-    0 1px 0 var(--side),
-    0 2px 4px rgba(0, 0, 0, 0.4);
+    inset 0 2px 0 rgba(255, 255, 255, 0.18),
+    inset 0 3px 8px rgba(0, 0, 0, 0.3),
+    0 2px 0 var(--side),
+    0 3px 0 rgba(0, 0, 0, 0.7),
+    0 5px 8px rgba(0, 0, 0, 0.5);
   filter: brightness(1.08);
 }
 .key:disabled { opacity: 0.35; pointer-events: none; }
@@ -144,16 +152,16 @@ button, input {
   stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
 }
 
-.key-fn    { --top: var(--fn-top);    --bot: var(--fn-bot);    --side: var(--fn-edge);    color: var(--text-dim); }
-.key-quick { --top: var(--quick-top); --bot: var(--quick-bot); --side: var(--quick-edge); color: #a9dbff; }
-.key-go    { --top: var(--go-top);    --bot: var(--go-bot);    --side: var(--go-edge); }
-.key-bust  { --top: var(--bust-top);  --bot: var(--bust-bot);  --side: var(--bust-edge); }
+.key-fn    { --top: var(--fn-top);    --bot: var(--fn-bot); color: var(--text-dim); }
+.key-quick { --top: var(--quick-top); --bot: var(--quick-bot); color: #a9dbff; }
+.key-go    { --top: var(--go-top);    --bot: var(--go-bot); }
+.key-bust  { --top: var(--bust-top);  --bot: var(--bust-bot); }
 .key-ghost {
   --top: rgba(255, 255, 255, 0.05); --bot: rgba(255, 255, 255, 0.02); --side: rgba(0, 0, 0, 0.5);
   color: var(--text-dim); font-size: 1.05rem; min-height: 56px;
   border: 1px solid var(--card-border);
 }
-.key.selected { --top: var(--sel-top); --bot: var(--sel-bot); --side: var(--sel-edge); color: #fff; }
+.key.selected { --top: var(--sel-top); --bot: var(--sel-bot); color: #fff; }
 
 .big-btn { min-height: 72px; font-size: 1.5rem; font-weight: 700; }
 
@@ -213,6 +221,7 @@ input:focus { outline: none; border-color: var(--accent); box-shadow: inset 0 2p
 .game-header { display: flex; align-items: center; gap: 8px; }
 .header-info {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -226,23 +235,29 @@ input:focus { outline: none; border-color: var(--accent); box-shadow: inset 0 2p
 .icon-btn {
   min-height: 54px; min-width: 62px; padding: 4px 8px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-  --top: var(--fn-top); --bot: var(--fn-bot); --side: var(--fn-edge);
+  --top: var(--fn-top); --bot: var(--fn-bot);
   color: #c9d1de;
 }
 .icon-btn svg { width: 22px; height: 22px; }
 .icon-btn span { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); }
 .icon-btn-spacer { min-width: 62px; }
 
-.banner {
-  background: linear-gradient(90deg, rgba(26, 163, 255, 0.28), rgba(26, 163, 255, 0.12));
-  border: 1px solid rgba(26, 163, 255, 0.55);
-  color: #d6eeff;
-  font-weight: 700;
-  text-align: center;
+/* Final round / tie-break tag under the round number */
+#target-label.status-tag {
+  margin-top: 3px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 2px 10px;
   border-radius: 999px;
-  padding: 7px 14px;
-  font-size: 1rem;
-  box-shadow: 0 0 20px rgba(26, 163, 255, 0.2);
+  border: 1px solid rgba(26, 163, 255, 0.6);
+  background: rgba(26, 163, 255, 0.2);
+  color: #d6eeff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 0 14px rgba(26, 163, 255, 0.35);
 }
 
 #scoreboard { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
@@ -421,7 +436,11 @@ input:focus { outline: none; border-color: var(--accent); box-shadow: inset 0 2p
 
 /* Short screens (e.g. iPhone SE): tighten everything above the number pad */
 @media (max-height: 740px) {
-  #game { gap: 6px; padding-top: max(10px, env(safe-area-inset-top)); }
+  :root { --edge: 7px; }
+  #game { gap: 5px; padding-top: max(10px, env(safe-area-inset-top)); padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+  .numpad { grid-auto-rows: minmax(44px, 1fr); gap: 3px 10px; }
+  .numpad .key { min-height: 44px; font-size: 1.7rem; }
+  #scoreboard { gap: 4px; }
   .icon-btn { min-height: 48px; }
   #scoreboard li { padding: 4px 12px 4px 6px; font-size: 1.1rem; }
   .avatar { width: 28px; height: 28px; font-size: 0.8rem; }
@@ -430,5 +449,4 @@ input:focus { outline: none; border-color: var(--accent); box-shadow: inset 0 2p
   .entry { padding: 4px 12px; }
   .quick-add .key { min-height: 46px; }
   .actions .big-btn { min-height: 60px; }
-  .banner { padding: 4px 10px; font-size: 0.92rem; }
 }

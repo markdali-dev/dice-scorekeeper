@@ -291,18 +291,18 @@ function startGame(players, target) {
 }
 
 function renderGame(state) {
-  $("round-label").textContent = state.tiebreak ? "Tie-break" : `Round ${state.round}`;
-  $("target-label").textContent = `to ${fmt(game.target)}`;
-  $("undo-btn").disabled = game.turns.length === 0;
-
-  const banner = $("banner");
+  // The top bar shows the round, and the target underneath. In the final
+  // round or a tie-break, that second line becomes a blue status tag.
+  const status = $("target-label");
   if (state.tiebreak) {
-    const names = state.active.map((i) => game.players[i]).join(" vs ");
-    banner.textContent = `Tie-break: ${names}`;
-  } else if (state.finalRound) {
-    banner.textContent = "Final round: last turns!";
+    $("round-label").textContent = "Tie-break";
+    status.textContent = state.active.map((i) => game.players[i]).join(" vs ");
+  } else {
+    $("round-label").textContent = `Round ${state.round}`;
+    status.textContent = state.finalRound ? "Final round" : `to ${fmt(game.target)}`;
   }
-  banner.classList.toggle("hidden", !state.tiebreak && !state.finalRound);
+  status.classList.toggle("status-tag", state.tiebreak || state.finalRound);
+  $("undo-btn").disabled = game.turns.length === 0;
 
   const board = $("scoreboard");
   board.innerHTML = "";

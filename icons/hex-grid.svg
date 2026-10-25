@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="51.96" height="90">
+  <!-- One repeating tile of the background honeycomb (pointy-top hexagons).
+       Colour and strength: change stroke and stroke-opacity. -->
+  <g fill="none" stroke="#1aa3ff" stroke-opacity="0.22" stroke-width="1.3">
+    <polygon points="25.98,1.00 51.10,15.50 51.10,44.50 25.98,59.00 0.87,44.50 0.87,15.50"/>
+    <polygon points="0.00,46.00 25.11,60.50 25.11,89.50 0.00,104.00 -25.11,89.50 -25.11,60.50"/>
+    <polygon points="51.96,46.00 77.08,60.50 77.08,89.50 51.96,104.00 26.85,89.50 26.85,60.50"/>
+    <polygon points="0.00,-44.00 25.11,-29.50 25.11,-0.50 0.00,14.00 -25.11,-0.50 -25.11,-29.50"/>
+    <polygon points="51.96,-44.00 77.08,-29.50 77.08,-0.50 51.96,14.00 26.85,-0.50 26.85,-29.50"/>
+    <polygon points="25.98,91.00 51.10,105.50 51.10,134.50 25.98,149.00 0.87,134.50 0.87,105.50"/>
+  </g>
+</svg>
