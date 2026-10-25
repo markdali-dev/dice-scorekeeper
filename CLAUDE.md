@@ -23,7 +23,7 @@ A simple scorekeeping app for a dice game, used at the table so the scorekeeper 
 - No minimum score required to get on the board.
 - No penalty for consecutive zeros.
 - Final round: when a player reaches or exceeds the winning score, the round still completes so every player has had the same number of turns (players after them in turn order get a last turn). Highest total after that round wins.
-- Tie: if two or more players are tied for the highest total after the final round, they play another round to decide it. Repeat until there is a single highest score.
+- Tie: if two or more players are tied for the highest total after the final round, only the tied players play another round to decide it. Repeat until there is a single highest score.
 
 ## Score entry
 - Number pad for typing any amount.
@@ -66,4 +66,4 @@ A simple scorekeeping app for a dice game, used at the table so the scorekeeper 
 - Small MCP server that exposes saved game history so chat/Claude can answer questions like "who has won the most games this year?" (the MCP learning stage).
 
 ## Open items
-- Tie-break round: only the tied players, or everyone? (Assumed: only the tied players.)
+- None right now.

@@ -96,9 +96,32 @@ input:focus { outline: none; border-color: var(--accent); }
 .game-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.header-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   color: var(--text-dim);
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
+  line-height: 1.2;
+}
+#round-label { color: var(--text); font-size: 1.15rem; }
+.small-btn { min-height: 52px; min-width: 96px; padding: 0 12px; font-size: 1.05rem; }
+.small-btn:disabled { opacity: 0.3; }
+.small-btn-spacer { min-width: 96px; }
+
+.banner {
+  background: var(--accent);
+  color: #000;
+  font-weight: 800;
+  text-align: center;
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: 1.05rem;
 }
 
 #scoreboard { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
@@ -112,13 +135,15 @@ input:focus { outline: none; border-color: var(--accent); }
   padding: 8px 14px;
   font-size: 1.3rem;
 }
-#scoreboard li .total { font-weight: 800; font-variant-numeric: tabular-nums; }
+#scoreboard li .total { white-space: nowrap; font-weight: 800; font-variant-numeric: tabular-nums; }
 #scoreboard li.current { border-color: var(--accent); background: #2a2400; }
 #scoreboard li.current .name::before { content: "▶ "; color: var(--accent); }
+#scoreboard li.reached .total::after { content: " ★"; color: var(--accent); }
+#scoreboard li.out { opacity: 0.4; }
 
 .entry { text-align: center; margin-top: 4px; }
 #turn-label { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
-#pending { font-size: 4rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+#pending { font-size: 3.4rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
 
 .quick-add { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .quick-add button { font-size: 1.2rem; }
@@ -126,4 +151,80 @@ input:focus { outline: none; border-color: var(--accent); }
 .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .numpad button { font-size: 1.8rem; }
 
-.actions { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: auto; }
+.actions { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+.actions .big-btn { min-height: 72px; }
+
+/* The game screen is exactly one phone screen tall: the number pad
+   stretches to fill whatever space is left, so Bust and Confirm sit at
+   the bottom. On very small screens the page scrolls a little instead
+   of squashing buttons below a safe tap size. */
+#game { gap: 8px; }
+.numpad { flex: 1 0 auto; grid-auto-rows: minmax(48px, 1fr); }
+.numpad button { min-height: 48px; }
+.quick-add button { min-height: 56px; }
+
+/* 5+ players: scoreboard in two columns so it stays short */
+#scoreboard.compact { display: grid; grid-template-columns: 1fr 1fr; }
+#scoreboard.compact li { font-size: 1.1rem; padding: 6px 10px; }
+#scoreboard.compact li .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 6px; }
+
+/* ---------- Score table ---------- */
+.table-wrap {
+  flex: 1;
+  overflow: auto;
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+#history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.05rem;
+}
+#history-table th,
+#history-table td {
+  padding: 10px 8px;
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--surface-2);
+}
+#history-table th:first-child,
+#history-table td:first-child { text-align: left; color: var(--text-dim); }
+#history-table thead th {
+  position: sticky; top: 0;
+  background: var(--surface-2);
+  max-width: 6em; overflow: hidden; text-overflow: ellipsis;
+}
+#history-table tfoot td {
+  position: sticky; bottom: 0;
+  background: var(--surface-2);
+  font-weight: 800;
+}
+#history-table td.zero { color: var(--danger); }
+#history-table td.skip { background: #111; }
+.muted-btn { background: var(--surface); color: var(--text-dim); font-size: 1.2rem; min-height: 64px; }
+
+/* ---------- Game over ---------- */
+#gameover { justify-content: center; }
+.trophy { font-size: 5rem; text-align: center; }
+#winner-label { font-size: 2.6rem; color: var(--accent); margin: 0 0 8px; }
+#final-standings { margin: 0 0 16px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+#final-standings li {
+  display: flex; justify-content: space-between;
+  background: var(--surface); border-radius: var(--radius);
+  padding: 12px 16px; font-size: 1.4rem;
+}
+#final-standings li:first-child { border: 3px solid var(--accent); }
+#final-standings .total { font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* Short screens (e.g. iPhone SE): tighten everything above the number pad */
+@media (max-height: 740px) {
+  #game { gap: 6px; padding-top: max(10px, env(safe-area-inset-top)); }
+  .small-btn { min-height: 46px; }
+  #scoreboard li { padding: 4px 12px; font-size: 1.15rem; }
+  #turn-label { font-size: 1.2rem; }
+  #pending { font-size: 2.6rem; }
+  .quick-add button { min-height: 48px; }
+  .actions .big-btn { min-height: 60px; }
+  .banner { padding: 5px 10px; font-size: 0.95rem; }
+}

@@ -36,9 +36,15 @@
   <!-- ===== Game screen ===== -->
   <section id="game" class="screen hidden">
     <header class="game-header">
-      <span id="round-label">Round 1</span>
-      <span id="target-label">to 10,000</span>
+      <button type="button" id="undo-btn" class="small-btn">↶ Undo</button>
+      <div class="header-info">
+        <span id="round-label">Round 1</span>
+        <span id="target-label">to 10,000</span>
+      </div>
+      <button type="button" id="table-btn" class="small-btn">Table</button>
     </header>
+
+    <div id="banner" class="banner hidden"></div>
 
     <ul id="scoreboard"></ul>
 
@@ -72,6 +78,29 @@
       <button type="button" id="bust-btn" class="big-btn danger">Bust</button>
       <button type="button" id="confirm-btn" class="big-btn primary">Confirm</button>
     </div>
+  </section>
+
+  <!-- ===== Round-by-round table ===== -->
+  <section id="history" class="screen hidden">
+    <header class="game-header">
+      <button type="button" id="history-back-btn" class="small-btn">← Back</button>
+      <div class="header-info"><span>Score table</span></div>
+      <span class="small-btn-spacer"></span>
+    </header>
+    <div class="table-wrap">
+      <table id="history-table"></table>
+    </div>
+    <button type="button" id="abandon-btn" class="big-btn muted-btn">End game &amp; start over</button>
+  </section>
+
+  <!-- ===== Game over ===== -->
+  <section id="gameover" class="screen hidden">
+    <div class="trophy">🏆</div>
+    <h1 id="winner-label"></h1>
+    <ol id="final-standings"></ol>
+    <button type="button" id="over-table-btn" class="big-btn">Score table</button>
+    <button type="button" id="over-undo-btn" class="big-btn">↶ Undo last score</button>
+    <button type="button" id="new-game-btn" class="big-btn primary">New game</button>
   </section>
 
   <script src="app.js"></script>
