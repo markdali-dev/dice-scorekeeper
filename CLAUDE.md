@@ -46,7 +46,8 @@ A simple scorekeeping app for a dice game, used at the table so the scorekeeper 
 
 ## Look and feel
 - Very large text and large tap targets; used in dim rooms, often one-handed, often while drinking.
-- Dark, high-contrast theme by default.
+- Dark, high-contrast theme by default. Accent color is electric blue (#1aa3ff), not yellow. Green for Confirm/Start, red for Bust.
+- Game-over screen shows five dice as a straight (1 to 5), not a trophy. App icon is a white die showing five on electric blue.
 - Prevent accidental zoom/double-tap issues; keep the screen awake during a game if the browser supports it.
 
 ## Non-goals
@@ -60,6 +61,12 @@ A simple scorekeeping app for a dice game, used at the table so the scorekeeper 
 3. Persistence (resume game, saved game history).
 4. PWA: manifest, icons, service worker, offline test on a real phone.
 5. Large-text polish and real-use testing at a game night.
+
+## Status
+- Steps 1 to 3 done. Step 4 built and tested offline in a browser; still needs the real-phone test.
+- Live site: GitHub Pages from the `main` branch (repo markdali-dev/dice-scorekeeper).
+- Service worker uses stale-while-revalidate: updates reach the phone on the second launch with a connection. No version number to bump.
+- If a new file is added to the app, add it to the FILES list in sw.js.
 
 ## Later (stretch)
 - Export game history as JSON.

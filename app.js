@@ -523,3 +523,8 @@ if (saved && saved.game && Array.isArray(saved.game.turns)) {
   pending = saved.pending || 0;
   render();
 }
+
+// Offline support (only works when served over http(s), not file://)
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  navigator.serviceWorker.register("sw.js");
+}
