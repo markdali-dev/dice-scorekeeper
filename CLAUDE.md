@@ -47,7 +47,10 @@ A simple scorekeeping app for a dice game, used at the table so the scorekeeper 
 
 ## Look and feel
 - Very large text and large tap targets; used in dim rooms, often one-handed, often while drinking.
-- Dark, high-contrast theme by default. Accent color is electric blue (#1aa3ff), not yellow. Green for Confirm/Start, red for Bust.
+- Dark, high-contrast theme by default. Accent color is electric blue (#1aa3ff), not yellow.
+- Polished "real app" look, not flat: navy radial-gradient background with fine grain, glassy cards, 3D keycap buttons (lit top, shaded side edge, press-down on tap). Muted green for Confirm/Start, muted brick red for Bust, with white text (no harsh solid colors).
+- Typed score shows in a recessed display panel. Each player has a colored initial badge; the current player glows blue.
+- Font: system rounded (SF Pro Rounded on iPhone), no downloaded fonts. All colors are tokens at the top of style.css.
 - Game-over screen shows five dice as a straight (1 to 5), not a trophy. App icon is a white die showing five on electric blue.
 - Prevent accidental zoom/double-tap issues; keep the screen awake during a game if the browser supports it.
 

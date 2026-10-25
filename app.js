@@ -22,6 +22,18 @@ let pending = 0;   // score being entered for the current turn
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => n.toLocaleString("en-US");
 
+// One colour per seat, used for the player badges
+const PLAYER_COLORS = ["#5cc8ff", "#f2b84b", "#b48cff", "#4fd1a5", "#ff8fa3", "#a3d65c", "#ff9f5a", "#7aa2ff"];
+
+// A round badge in the player's colour showing their initial (or seat number)
+function avatar(i, name) {
+  const el = document.createElement("span");
+  el.className = "avatar";
+  el.style.setProperty("--p", PLAYER_COLORS[i % PLAYER_COLORS.length]);
+  el.textContent = (name || "").trim().charAt(0).toUpperCase() || String(i + 1);
+  return el;
+}
+
 // ---------- Saving ----------
 
 const CURRENT_KEY = "dice.current";
@@ -179,7 +191,14 @@ function renderNameFields() {
     input.value = setup.names[i] || "";
     input.autocomplete = "off";
     input.enterKeyHint = "next";
-    box.appendChild(input);
+    const badge = avatar(i, input.value);
+    input.addEventListener("input", () => {
+      badge.textContent = input.value.trim().charAt(0).toUpperCase() || String(i + 1);
+    });
+    const row = document.createElement("div");
+    row.className = "name-row";
+    row.append(badge, input);
+    box.appendChild(row);
   }
   $("player-count").textContent = setup.count;
   $("players-minus").disabled = setup.count <= MIN_PLAYERS;
@@ -299,7 +318,7 @@ function renderGame(state) {
     const totalEl = document.createElement("span");
     totalEl.className = "total";
     totalEl.textContent = fmt(state.totals[i]);
-    li.append(nameEl, totalEl);
+    li.append(avatar(i, name), nameEl, totalEl);
     board.appendChild(li);
   });
 
@@ -437,32 +456,50 @@ function renderDice() {
     5: [[28, 28], [72, 28], [50, 50], [28, 72], [72, 72]],
   };
   const tilt = [-8, 5, -3, 7, -6];
-  let svg = '<svg viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg" role="img">';
+  // Shaded ivory faces with a darker base edge and recessed pips
+  let svg = `<svg viewBox="0 0 560 124" xmlns="http://www.w3.org/2000/svg" role="img">
+    <defs>
+      <linearGradient id="die-face" x1="0" y1="0" x2="0.4" y2="1">
+        <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe4ec"/>
+      </linearGradient>
+      <radialGradient id="die-pip" cx="0.4" cy="0.35" r="0.7">
+        <stop offset="0" stop-color="#2a3344"/><stop offset="1" stop-color="#0b0f17"/>
+      </radialGradient>
+    </defs>`;
   for (let face = 1; face <= 5; face++) {
     const x = (face - 1) * 112 + 6;
     svg += `<g transform="translate(${x} 10) rotate(${tilt[face - 1]} 50 50)">`;
-    svg += '<rect x="0" y="0" width="100" height="100" rx="18" fill="#fff" stroke="var(--accent)" stroke-width="5"/>';
-    for (const [cx, cy] of pips[face]) svg += `<circle cx="${cx}" cy="${cy}" r="10" fill="#111"/>`;
+    svg += '<rect x="0" y="6" width="100" height="100" rx="20" fill="#9aa6b8"/>';
+    svg += '<rect x="0" y="0" width="100" height="100" rx="20" fill="url(#die-face)"/>';
+    svg += '<rect x="2" y="2" width="96" height="96" rx="18" fill="none" stroke="#fff" stroke-opacity="0.7" stroke-width="2"/>';
+    for (const [cx, cy] of pips[face]) {
+      svg += `<circle cx="${cx}" cy="${cy + 1}" r="10" fill="#fff" opacity="0.8"/>`;
+      svg += `<circle cx="${cx}" cy="${cy}" r="10" fill="${face === 5 ? "#138bdb" : "url(#die-pip)"}"/>`;
+    }
     svg += "</g>";
   }
   $("dice").innerHTML = svg + "</svg>";
 }
 
 function renderGameOver(state) {
-  $("winner-label").textContent = `${game.players[state.winner]} wins!`;
+  $("winner-label").textContent = game.players[state.winner];
   const list = $("final-standings");
   list.innerHTML = "";
   game.players
-    .map((name, i) => ({ name, total: state.totals[i] }))
+    .map((name, i) => ({ name, i, total: state.totals[i] }))
     .sort((a, b) => b.total - a.total)
-    .forEach(({ name, total }) => {
+    .forEach(({ name, i, total }, place) => {
       const li = document.createElement("li");
+      const rank = document.createElement("span");
+      rank.className = "rank";
+      rank.textContent = place + 1;
       const nameEl = document.createElement("span");
+      nameEl.className = "name";
       nameEl.textContent = name;
       const totalEl = document.createElement("span");
       totalEl.className = "total";
       totalEl.textContent = fmt(total);
-      li.append(nameEl, totalEl);
+      li.append(rank, avatar(i, name), nameEl, totalEl);
       list.appendChild(li);
     });
 }
@@ -530,6 +567,10 @@ $("clear-past-btn").addEventListener("click", () => {
 });
 
 // ---------- Init ----------
+
+// iPhone Safari only shows the :active "pressed key" look if the page
+// listens for touches
+document.addEventListener("touchstart", () => {}, { passive: true });
 
 renderDice();
 restoreSetup();

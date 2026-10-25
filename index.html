@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <!-- Disable pinch/double-tap zoom so stray taps at the table don't zoom the page -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#0b111c">
   <title>Dice Scorekeeper</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -12,7 +12,7 @@
   <!-- iPhone: run full-screen when added to the home screen -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Dice Score">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -20,38 +20,63 @@
 
   <!-- ===== Setup screen ===== -->
   <section id="setup" class="screen">
-    <h1>Dice Scorekeeper</h1>
+    <header class="brand">
+      <svg class="brand-die" viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="6" y="6" width="88" height="88" rx="20"/>
+        <circle cx="30" cy="30" r="8"/><circle cx="70" cy="30" r="8"/>
+        <circle cx="50" cy="50" r="8"/>
+        <circle cx="30" cy="70" r="8"/><circle cx="70" cy="70" r="8"/>
+      </svg>
+      <div>
+        <h1>Dice Scorekeeper</h1>
+        <p class="brand-sub">5,000 · 10,000</p>
+      </div>
+    </header>
 
-    <label class="field-label">Players</label>
-    <div class="stepper">
-      <button type="button" id="players-minus" aria-label="Fewer players">−</button>
-      <span id="player-count">2</span>
-      <button type="button" id="players-plus" aria-label="More players">+</button>
+    <div class="card">
+      <div class="card-head">
+        <span class="section-label">Players</span>
+        <div class="stepper">
+          <button type="button" id="players-minus" class="key key-round" aria-label="Fewer players">−</button>
+          <span id="player-count">2</span>
+          <button type="button" id="players-plus" class="key key-round" aria-label="More players">+</button>
+        </div>
+      </div>
+      <div id="name-fields"></div>
     </div>
 
-    <div id="name-fields"></div>
-
-    <label class="field-label">Winning score</label>
-    <div class="target-options">
-      <button type="button" class="target-btn" data-target="5000">5,000</button>
-      <button type="button" class="target-btn" data-target="10000">10,000</button>
-      <input type="number" id="custom-target" inputmode="numeric" placeholder="Other" min="1">
+    <div class="card">
+      <span class="section-label">Winning score</span>
+      <div class="target-options">
+        <button type="button" class="key target-btn" data-target="5000">5,000</button>
+        <button type="button" class="key target-btn" data-target="10000">10,000</button>
+        <input type="number" id="custom-target" inputmode="numeric" placeholder="Other" min="1">
+      </div>
     </div>
 
-    <button type="button" id="start-btn" class="big-btn primary">Start game</button>
-    <button type="button" id="past-btn" class="big-btn muted-btn">Past games</button>
+    <button type="button" id="start-btn" class="key key-go big-btn">Start game</button>
+    <button type="button" id="past-btn" class="key key-ghost">Past games</button>
   </section>
 
   <!-- ===== Game screen ===== -->
   <section id="game" class="screen hidden">
     <header class="game-header">
-      <button type="button" id="undo-btn" class="small-btn">↶ Undo</button>
+      <button type="button" id="undo-btn" class="key icon-btn" aria-label="Undo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+        <span>Undo</span>
+      </button>
       <div class="header-info">
         <span id="round-label">Round 1</span>
         <span id="target-label">to 10,000</span>
       </div>
-      <button type="button" id="table-btn" class="small-btn">Table</button>
-      <button type="button" id="quit-btn" class="small-btn">Quit</button>
+      <button type="button" id="table-btn" class="key icon-btn" aria-label="Score table">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M10 4v16"/></svg>
+        <span>Table</span>
+      </button>
+      <button type="button" id="quit-btn" class="key icon-btn" aria-label="Quit game">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        <span>Quit</span>
+      </button>
     </header>
 
     <div id="banner" class="banner hidden"></div>
@@ -64,40 +89,45 @@
     </div>
 
     <div class="quick-add">
-      <button type="button" data-add="50">+50</button>
-      <button type="button" data-add="100">+100</button>
-      <button type="button" data-add="1000">+1,000</button>
+      <button type="button" class="key key-quick" data-add="50">+50</button>
+      <button type="button" class="key key-quick" data-add="100">+100</button>
+      <button type="button" class="key key-quick" data-add="1000">+1,000</button>
     </div>
 
     <div class="numpad">
-      <button type="button" data-digit="1">1</button>
-      <button type="button" data-digit="2">2</button>
-      <button type="button" data-digit="3">3</button>
-      <button type="button" data-digit="4">4</button>
-      <button type="button" data-digit="5">5</button>
-      <button type="button" data-digit="6">6</button>
-      <button type="button" data-digit="7">7</button>
-      <button type="button" data-digit="8">8</button>
-      <button type="button" data-digit="9">9</button>
-      <button type="button" id="clear-btn" class="muted">Clear</button>
-      <button type="button" data-digit="0">0</button>
-      <button type="button" id="back-btn" class="muted" aria-label="Backspace">⌫</button>
+      <button type="button" class="key" data-digit="1">1</button>
+      <button type="button" class="key" data-digit="2">2</button>
+      <button type="button" class="key" data-digit="3">3</button>
+      <button type="button" class="key" data-digit="4">4</button>
+      <button type="button" class="key" data-digit="5">5</button>
+      <button type="button" class="key" data-digit="6">6</button>
+      <button type="button" class="key" data-digit="7">7</button>
+      <button type="button" class="key" data-digit="8">8</button>
+      <button type="button" class="key" data-digit="9">9</button>
+      <button type="button" id="clear-btn" class="key key-fn">Clear</button>
+      <button type="button" class="key" data-digit="0">0</button>
+      <button type="button" id="back-btn" class="key key-fn" aria-label="Backspace">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1Z"/><path d="m17 9-6 6M11 9l6 6"/></svg>
+      </button>
     </div>
 
     <div class="actions">
-      <button type="button" id="bust-btn" class="big-btn danger">Bust</button>
-      <button type="button" id="confirm-btn" class="big-btn primary">Confirm</button>
+      <button type="button" id="bust-btn" class="key key-bust big-btn">Bust</button>
+      <button type="button" id="confirm-btn" class="key key-go big-btn">Confirm</button>
     </div>
   </section>
 
   <!-- ===== Round-by-round table ===== -->
   <section id="history" class="screen hidden">
     <header class="game-header">
-      <button type="button" id="history-back-btn" class="small-btn">← Back</button>
-      <div class="header-info"><span>Score table</span></div>
-      <span class="small-btn-spacer"></span>
+      <button type="button" id="history-back-btn" class="key icon-btn" aria-label="Back">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        <span>Back</span>
+      </button>
+      <div class="header-info"><span class="screen-title">Score table</span></div>
+      <span class="icon-btn-spacer"></span>
     </header>
-    <div class="table-wrap">
+    <div class="table-wrap card">
       <table id="history-table"></table>
     </div>
   </section>
@@ -105,30 +135,40 @@
   <!-- ===== Game over ===== -->
   <section id="gameover" class="screen hidden">
     <div class="dice" id="dice" aria-label="Five dice showing a straight, 1 to 5"></div>
-    <h1 id="winner-label"></h1>
+    <div class="winner-block">
+      <span class="section-label">Winner</span>
+      <h1 id="winner-label"></h1>
+    </div>
     <ol id="final-standings"></ol>
-    <button type="button" id="over-table-btn" class="big-btn">Score table</button>
-    <button type="button" id="over-undo-btn" class="big-btn">↶ Undo last score</button>
-    <button type="button" id="new-game-btn" class="big-btn primary">New game</button>
+    <div class="over-buttons">
+      <button type="button" id="over-table-btn" class="key">Score table</button>
+      <button type="button" id="over-undo-btn" class="key">Undo last score</button>
+    </div>
+    <button type="button" id="new-game-btn" class="key key-go big-btn">New game</button>
   </section>
 
   <!-- ===== Past games ===== -->
   <section id="past" class="screen hidden">
     <header class="game-header">
-      <button type="button" id="past-back-btn" class="small-btn">← Back</button>
-      <div class="header-info"><span>Past games</span></div>
-      <span class="small-btn-spacer"></span>
+      <button type="button" id="past-back-btn" class="key icon-btn" aria-label="Back">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        <span>Back</span>
+      </button>
+      <div class="header-info"><span class="screen-title">Past games</span></div>
+      <span class="icon-btn-spacer"></span>
     </header>
     <ul id="past-list"></ul>
-    <button type="button" id="clear-past-btn" class="big-btn muted-btn">Delete all past games</button>
+    <button type="button" id="clear-past-btn" class="key key-ghost">Delete all past games</button>
   </section>
 
   <!-- ===== "Are you sure?" (covers whatever screen is showing) ===== -->
   <div id="ask" class="ask hidden" role="dialog" aria-modal="true" aria-labelledby="ask-title">
-    <h2 id="ask-title">Are you sure?</h2>
-    <p id="ask-detail"></p>
-    <button type="button" id="ask-yes" class="big-btn danger">Yes</button>
-    <button type="button" id="ask-cancel" class="big-btn">Cancel</button>
+    <div class="ask-card">
+      <h2 id="ask-title">Are you sure?</h2>
+      <p id="ask-detail"></p>
+      <button type="button" id="ask-yes" class="key key-bust big-btn">Yes</button>
+      <button type="button" id="ask-cancel" class="key big-btn">Cancel</button>
+    </div>
   </div>
 
   <script src="app.js"></script>
