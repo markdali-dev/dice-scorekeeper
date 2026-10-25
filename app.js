@@ -6,6 +6,11 @@
 // turn it is, the round, totals, final round, tie-breaks, the winner) is
 // worked out by replaying that list from the start, so undo is just
 // removing the last entry.
+//
+// Saved in the browser (localStorage) on every action:
+//   dice.current   the game in progress plus the half-typed score
+//   dice.history   finished games, newest first
+//   dice.setup     last names and target, so a rematch is quick
 
 const MIN_PLAYERS = 2;
 const MAX_PLAYERS = 8;
@@ -16,6 +21,84 @@ let pending = 0;   // score being entered for the current turn
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => n.toLocaleString("en-US");
+
+// ---------- Saving ----------
+
+const CURRENT_KEY = "dice.current";
+const HISTORY_KEY = "dice.history";
+const SETUP_KEY = "dice.setup";
+
+// Storage can be unavailable (e.g. some private browsing modes); the app
+// still works, it just won't remember anything.
+function load(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw === null ? fallback : JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+function save(key, value) {
+  try {
+    if (value === null) localStorage.removeItem(key);
+    else localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // ignore: nothing useful to do if storage is full or blocked
+  }
+}
+
+function saveCurrent() {
+  save(CURRENT_KEY, game ? { game, pending } : null);
+}
+
+// Keeps the history list in step with the current game: a finished game is
+// added (or updated), and if the winning score is undone it's removed again.
+function syncHistory(state) {
+  const history = load(HISTORY_KEY, []);
+  const index = history.findIndex((h) => h.id === game.id);
+  if (state.winner === null) {
+    if (index !== -1) {
+      history.splice(index, 1);
+      save(HISTORY_KEY, history);
+    }
+    return;
+  }
+  const entry = {
+    id: game.id,
+    date: index !== -1 ? history[index].date : new Date().toISOString(),
+    target: game.target,
+    players: game.players.map((name, i) => ({ name, score: state.totals[i] })),
+    winner: game.players[state.winner],
+    rounds: state.rounds.length,
+    turns: game.turns.slice(),
+  };
+  if (index !== -1) history[index] = entry;
+  else history.unshift(entry);
+  save(HISTORY_KEY, history);
+}
+
+// ---------- Keep the screen awake during a game ----------
+
+let wakeLock = null;
+
+async function keepAwake(on) {
+  try {
+    if (on && !wakeLock && "wakeLock" in navigator && document.visibilityState === "visible") {
+      wakeLock = await navigator.wakeLock.request("screen");
+      wakeLock.addEventListener("release", () => { wakeLock = null; });
+    } else if (!on && wakeLock) {
+      await wakeLock.release();
+    }
+  } catch {
+    // not supported or refused (e.g. low battery): the app works without it
+  }
+}
+
+// The browser drops the lock when the app is hidden; take it back on return
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && game) keepAwake(true);
+});
 
 // ---------- Replaying the game ----------
 
@@ -137,21 +220,40 @@ $("custom-target").addEventListener("input", (e) => {
 $("start-btn").addEventListener("click", () => {
   const inputs = [...$("name-fields").querySelectorAll("input")];
   const players = inputs.map((input, i) => input.value.trim() || `Player ${i + 1}`);
+  save(SETUP_KEY, {
+    count: setup.count,
+    names: inputs.map((input) => input.value.trim()),
+    target: setup.target,
+  });
   startGame(players, setup.target);
 });
 
+function restoreSetup() {
+  const saved = load(SETUP_KEY, null);
+  if (!saved) return;
+  setup.count = Math.min(Math.max(saved.count, MIN_PLAYERS), MAX_PLAYERS);
+  setup.names = saved.names || [];
+  setup.target = saved.target > 0 ? saved.target : 10000;
+  if (setup.target !== 5000 && setup.target !== 10000) $("custom-target").value = setup.target;
+}
+
 // ---------- Screens ----------
 
+let historyReturnTo = "game";   // where Back on the score table goes
+
 function showScreen(id) {
-  for (const s of ["setup", "game", "history", "gameover"]) {
+  for (const s of ["setup", "game", "history", "gameover", "past"]) {
     $(s).classList.toggle("hidden", s !== id);
   }
   window.scrollTo(0, 0);
+  keepAwake(id === "game" || (id === "history" && historyReturnTo === "game"));
 }
 
 // Shows the game or the game-over screen, whichever fits the current state
 function render() {
   const state = replay(game);
+  saveCurrent();
+  syncHistory(state);
   if (state.winner !== null) {
     renderGameOver(state);
     showScreen("gameover");
@@ -164,7 +266,7 @@ function render() {
 // ---------- Game screen ----------
 
 function startGame(players, target) {
-  game = { players, target, turns: [] };
+  game = { id: Date.now(), players, target, turns: [] };
   pending = 0;
   render();
 }
@@ -212,6 +314,7 @@ function renderPending() {
 function setPending(value) {
   pending = Math.min(Math.max(0, value), MAX_PENDING);
   renderPending();
+  saveCurrent();
 }
 
 function recordTurn(score) {
@@ -282,8 +385,6 @@ function renderHistory() {
   state.totals.forEach((t) => { foot.insertCell().textContent = fmt(t); });
 }
 
-let historyReturnTo = "game";
-
 function openHistory(from) {
   historyReturnTo = from;
   renderHistory();
@@ -299,13 +400,32 @@ $("history-back-btn").addEventListener("click", () => showScreen(historyReturnTo
 
 $("abandon-btn").addEventListener("click", () => {
   if (confirm("End this game and go back to setup? Scores will be lost.")) {
-    game = null;
-    pending = 0;
-    showScreen("setup");
+    leaveGame();
   }
 });
 
 // ---------- Game over ----------
+
+// Five dice showing a straight, 1 to 5
+function renderDice() {
+  const pips = {
+    1: [[50, 50]],
+    2: [[28, 28], [72, 72]],
+    3: [[28, 28], [50, 50], [72, 72]],
+    4: [[28, 28], [72, 28], [28, 72], [72, 72]],
+    5: [[28, 28], [72, 28], [50, 50], [28, 72], [72, 72]],
+  };
+  const tilt = [-8, 5, -3, 7, -6];
+  let svg = '<svg viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg" role="img">';
+  for (let face = 1; face <= 5; face++) {
+    const x = (face - 1) * 112 + 6;
+    svg += `<g transform="translate(${x} 10) rotate(${tilt[face - 1]} 50 50)">`;
+    svg += '<rect x="0" y="0" width="100" height="100" rx="18" fill="#fff" stroke="var(--accent)" stroke-width="5"/>';
+    for (const [cx, cy] of pips[face]) svg += `<circle cx="${cx}" cy="${cy}" r="10" fill="#111"/>`;
+    svg += "</g>";
+  }
+  $("dice").innerHTML = svg + "</svg>";
+}
 
 function renderGameOver(state) {
   $("winner-label").textContent = `${game.players[state.winner]} wins!`;
@@ -328,14 +448,78 @@ function renderGameOver(state) {
 
 $("over-undo-btn").addEventListener("click", undo);
 
-$("new-game-btn").addEventListener("click", () => {
-  // Setup keeps the same names and target, ready for a rematch
+$("new-game-btn").addEventListener("click", leaveGame);
+
+// Back to setup, which keeps the same names and target ready for a rematch.
+// A finished game is already in the history list.
+function leaveGame() {
   game = null;
   pending = 0;
+  saveCurrent();
   showScreen("setup");
+}
+
+// ---------- Past games ----------
+
+function renderPast() {
+  const history = load(HISTORY_KEY, []);
+  const list = $("past-list");
+  list.innerHTML = "";
+  if (history.length === 0) {
+    const li = document.createElement("li");
+    li.className = "empty";
+    li.textContent = "No finished games yet.";
+    list.appendChild(li);
+  }
+  for (const h of history) {
+    const li = document.createElement("li");
+    const top = document.createElement("div");
+    top.className = "past-top";
+    const date = document.createElement("span");
+    date.textContent = new Date(h.date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+    const meta = document.createElement("span");
+    meta.textContent = `to ${fmt(h.target)} · ${h.rounds} rds`;
+    top.append(date, meta);
+
+    const winner = document.createElement("div");
+    winner.className = "past-winner";
+    winner.textContent = `${h.winner} won`;
+
+    const scores = document.createElement("div");
+    scores.className = "past-scores";
+    scores.textContent = h.players
+      .slice()
+      .sort((a, b) => b.score - a.score)
+      .map((p) => `${p.name} ${fmt(p.score)}`)
+      .join(" · ");
+
+    li.append(top, winner, scores);
+    list.appendChild(li);
+  }
+  $("clear-past-btn").classList.toggle("hidden", history.length === 0);
+}
+
+$("past-btn").addEventListener("click", () => { renderPast(); showScreen("past"); });
+$("past-back-btn").addEventListener("click", () => showScreen("setup"));
+$("clear-past-btn").addEventListener("click", () => {
+  if (confirm("Delete all past games? This can't be undone.")) {
+    save(HISTORY_KEY, null);
+    renderPast();
+  }
 });
 
 // ---------- Init ----------
 
+renderDice();
+restoreSetup();
 renderNameFields();
 renderTargetChoice();
+
+// Pick up where we left off after a refresh, app close or phone lock
+const saved = load(CURRENT_KEY, null);
+if (saved && saved.game && Array.isArray(saved.game.turns)) {
+  game = saved.game;
+  if (!game.id) game.id = Date.now();
+  pending = saved.pending || 0;
+  render();
+}

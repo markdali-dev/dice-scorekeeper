@@ -31,6 +31,7 @@
     </div>
 
     <button type="button" id="start-btn" class="big-btn primary">Start game</button>
+    <button type="button" id="past-btn" class="big-btn muted-btn">Past games</button>
   </section>
 
   <!-- ===== Game screen ===== -->
@@ -95,12 +96,23 @@
 
   <!-- ===== Game over ===== -->
   <section id="gameover" class="screen hidden">
-    <div class="trophy">🏆</div>
+    <div class="dice" id="dice" aria-label="Five dice showing a straight, 1 to 5"></div>
     <h1 id="winner-label"></h1>
     <ol id="final-standings"></ol>
     <button type="button" id="over-table-btn" class="big-btn">Score table</button>
     <button type="button" id="over-undo-btn" class="big-btn">↶ Undo last score</button>
     <button type="button" id="new-game-btn" class="big-btn primary">New game</button>
+  </section>
+
+  <!-- ===== Past games ===== -->
+  <section id="past" class="screen hidden">
+    <header class="game-header">
+      <button type="button" id="past-back-btn" class="small-btn">← Back</button>
+      <div class="header-info"><span>Past games</span></div>
+      <span class="small-btn-spacer"></span>
+    </header>
+    <ul id="past-list"></ul>
+    <button type="button" id="clear-past-btn" class="big-btn muted-btn">Delete all past games</button>
   </section>
 
   <script src="app.js"></script>

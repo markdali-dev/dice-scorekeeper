@@ -5,7 +5,7 @@
   --surface-2: #2c2c2e;
   --text: #fff;
   --text-dim: #a1a1a6;
-  --accent: #ffd60a;      /* current player / selected */
+  --accent: #1aa3ff;      /* electric blue: current player / selected */
   --primary: #30d158;     /* confirm / start */
   --danger: #ff453a;      /* bust */
   --radius: 14px;
@@ -136,7 +136,7 @@ input:focus { outline: none; border-color: var(--accent); }
   font-size: 1.3rem;
 }
 #scoreboard li .total { white-space: nowrap; font-weight: 800; font-variant-numeric: tabular-nums; }
-#scoreboard li.current { border-color: var(--accent); background: #2a2400; }
+#scoreboard li.current { border-color: var(--accent); background: #002448; }
 #scoreboard li.current .name::before { content: "▶ "; color: var(--accent); }
 #scoreboard li.reached .total::after { content: " ★"; color: var(--accent); }
 #scoreboard li.out { opacity: 0.4; }
@@ -206,7 +206,8 @@ input:focus { outline: none; border-color: var(--accent); }
 
 /* ---------- Game over ---------- */
 #gameover { justify-content: center; }
-.trophy { font-size: 5rem; text-align: center; }
+.dice { padding: 0 4px; }
+.dice svg { width: 100%; height: auto; display: block; }
 #winner-label { font-size: 2.6rem; color: var(--accent); margin: 0 0 8px; }
 #final-standings { margin: 0 0 16px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
 #final-standings li {
@@ -228,3 +229,11 @@ input:focus { outline: none; border-color: var(--accent); }
   .actions .big-btn { min-height: 60px; }
   .banner { padding: 5px 10px; font-size: 0.95rem; }
 }
+
+/* ---------- Past games ---------- */
+#past-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+#past-list li { background: var(--surface); border-radius: var(--radius); padding: 12px 16px; }
+#past-list li.empty { color: var(--text-dim); text-align: center; }
+.past-top { display: flex; justify-content: space-between; color: var(--text-dim); font-size: 0.95rem; }
+.past-winner { font-size: 1.4rem; font-weight: 800; color: var(--accent); margin: 2px 0; }
+.past-scores { font-size: 1.05rem; }
